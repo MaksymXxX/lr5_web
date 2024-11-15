@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="author" content="Dduucckk">
+  <meta name="description" content="Тестовая страница">
+  <meta charset="UTF-8">
+  <title>lab 5</title>
+  <link rel="stylesheet" href="css/style1.css">
+</head>
+<body>
+<script>
+
+  const diagonal1 = 8;
+  const diagonal2 = 6;
+
+  function calculateRhombusArea(d1, d2) {
+    return (d1 * d2) / 2;
+  }
+
+  function swapHeaderFooterContent() {
+    const headerLeftPart = document.querySelector('.item1 .left-part').innerHTML;
+    const headerRightPart = document.querySelector('.item1 .right-part').innerHTML;
+
+    const footerLeftPart = document.querySelector('.item6 .left-part').innerHTML;
+    const footerRightPart = document.querySelector('.item6 .right-part').innerHTML;
+
+    document.querySelector('.item1 .left-part').innerHTML = footerLeftPart;
+    document.querySelector('.item1 .right-part').innerHTML = footerRightPart;
+    document.querySelector('.item6 .left-part').innerHTML = headerLeftPart;
+    document.querySelector('.item6 .right-part').innerHTML = headerRightPart;
+  }
+  function displayRhombusArea() {
+    const area = calculateRhombusArea(diagonal1, diagonal2);
+    const item3 = document.querySelector('.item3');
+    item3.textContent += ` Площа ромба: ${area} кв. од. Діагоналі: d₁ = ${diagonal1}, d₂ = ${diagonal2}`;
+  }
+
+  function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+  }
+
+  function getCookie(name) {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [cookieName, cookieValue] = cookie.split('=');
+      if (cookieName.trim() === name) {
+        return cookieValue;
+      }
+    }
+    return null;
+  }
+
+  function deleteCookie(name) {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  }
+
+  function isTrianglePossible(a, b, c) {
+    return (a + b > c) && (b + c > a) && (a + c > b);
+  }
+
+  function createTriangleForm() {
+    return `
+        <form id="triangleForm">
+            <div style="margin: 10px 0;">
+                <label for="sideA">Сторона a:</label>
+                <input type="number" id="sideA" required style="margin-left: 10px;">
+            </div>
+            <div style="margin: 10px 0;">
+                <label for="sideB">Сторона b:</label>
+                <input type="number" id="sideB" required style="margin-left: 10px;">
+            </div>
+            <div style="margin: 10px 0;">
+                <label for="sideC">Сторона c:</label>
+                <input type="number" id="sideC" required style="margin-left: 10px;">
+            </div>
+            <button type="submit" style="padding: 5px 10px;">Перевірити</button>
+        </form>
+    `;
+  }
+
+  function handleTriangle() {
+    const item3 = document.querySelector('.item3');
+    const triangleResult = getCookie('triangleResult');
+
+    if (triangleResult) {
+      const shouldDelete = confirm(`Збережений результат: ${triangleResult}\nБажаєте видалити дані з cookies?`);
+
+      if (shouldDelete) {
+        deleteCookie('triangleResult');
+        window.location.reload();
+      } else {
+        alert('Дані збережені в cookies. Перезавантажте сторінку для введення нових даних.');
+      }
+    } else {
+      item3.innerHTML += createTriangleForm();
+
+      document.getElementById('triangleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const a = Number(document.getElementById('sideA').value);
+        const b = Number(document.getElementById('sideB').value);
+        const c = Number(document.getElementById('sideC').value);
+
+        const possible = isTrianglePossible(a, b, c);
+        const result = possible ?
+                `Трикутник зі сторонами ${a}, ${b}, ${c} можливий` :
+                `Трикутник зі сторонами ${a}, ${b}, ${c} неможливий`;
+
+        alert(result);
+        setCookie('triangleResult', result, 1);
+        window.location.reload();
+      });
+    }
+  }
+
+  const radioButtonsHTML = `
+  <form id="italicForm" style="margin-bottom: 10px;">
+    <label>
+      <input type="radio" name="italicSetting" value="true"> Курсив
+    </label>
+    <label style="margin-left: 10px;">
+      <input type="radio" name="italicSetting" value="false"> Звичайний
+    </label>
+  </form>
+`;
+  
+  function setupItalicControl() {
+    const item2 = document.querySelector('.item2');
+
+    item2.insertAdjacentHTML('afterbegin', radioButtonsHTML);
+
+    const form = document.getElementById('italicForm');
+    const textContent = document.createElement('div');
+    textContent.id = 'item2Content';
+
+    textContent.innerHTML = item2.innerHTML.replace(form.outerHTML, '');
+    item2.innerHTML = form.outerHTML;
+    item2.appendChild(textContent);
+
+    const savedItalicSetting = localStorage.getItem('italicSetting');
+    if (savedItalicSetting) {
+      const radioButton = document.querySelector(`input[value="${savedItalicSetting}"]`);
+      if (radioButton) {
+        radioButton.checked = true;
+        if (savedItalicSetting === 'true') {
+          textContent.style.fontStyle = 'italic';
+        }
+      }
+    }
+
+    form.addEventListener('change', (e) => {
+      const isItalic = e.target.value === 'true';
+      localStorage.setItem('italicSetting', isItalic);
+    });
+
+    textContent.addEventListener('mouseover', () => {
+      const checkedRadio = document.querySelector('input[name="italicSetting"]:checked');
+      if (checkedRadio && checkedRadio.value === 'true') {
+        textContent.style.fontStyle = 'italic';
+      }
+    });
+
+    textContent.addEventListener('mouseout', () => {
+      if (localStorage.getItem('italicSetting') !== 'true') {
+        textContent.style.fontStyle = 'normal';
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    function createList(blockSelector) {
+      const block = document.querySelector(blockSelector);
+      const listKey = `listData-${blockSelector}`;
+      const originalContent = block.innerHTML;
+
+      const addLink = document.createElement('a');
+      addLink.href = '#';
+      addLink.textContent = 'Додати пункт списку';
+      block.appendChild(addLink);
+
+      const listContainer = document.createElement('ol');
+      block.appendChild(listContainer);
+
+      const saveButton = document.createElement('button');
+      saveButton.textContent = 'Зберегти список';
+      block.appendChild(saveButton);
+
+      const clearButton = document.createElement('button');
+      clearButton.textContent = 'Очистити список';
+      block.appendChild(clearButton);
+
+      const savedList = JSON.parse(localStorage.getItem(listKey)) || [];
+      if (savedList.length > 0) {
+        block.innerHTML = '';
+        block.appendChild(listContainer);
+        block.appendChild(addLink);
+        block.appendChild(saveButton);
+        block.appendChild(clearButton);
+
+        savedList.forEach((item, index) => {
+          const listItem = createListItem(item, index);
+          listContainer.appendChild(listItem);
+        });
+      }
+      addLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const newItemText = prompt('Введіть текст пункту:');
+        if (newItemText) {
+          const newIndex = listContainer.children.length;
+          const newItem = createListItem(newItemText, newIndex);
+          listContainer.appendChild(newItem);
+        }
+      });
+
+      saveButton.addEventListener('click', () => {
+        const listData = Array.from(listContainer.children).map(item => item.textContent);
+        localStorage.setItem(listKey, JSON.stringify(listData));
+
+        block.innerHTML = '';
+        block.appendChild(listContainer);
+        block.appendChild(addLink);
+        block.appendChild(saveButton);
+        block.appendChild(clearButton);
+
+        alert('Список збережено!');
+      });
+
+      clearButton.addEventListener('click', () => {
+        localStorage.removeItem(listKey);
+        block.innerHTML = originalContent;
+        block.appendChild(addLink);
+        block.appendChild(listContainer);
+        block.appendChild(saveButton);
+        block.appendChild(clearButton);
+        listContainer.innerHTML = '';
+      });
+
+      function createListItem(text, index) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${index + 1}. ${text}`;
+
+        // Стилізація "зебра"
+        if (index % 2 === 0) {
+          listItem.style.color = 'black';
+          listItem.style.backgroundColor = 'white';
+        } else {
+          listItem.style.color = 'white';
+          listItem.style.backgroundColor = 'black';
+        }
+
+        return listItem;
+      }
+    }
+    const listBlocks = ['.item1', '.item4', '.item5', '.item6'];
+    listBlocks.forEach(createList);
+
+    swapHeaderFooterContent();
+    displayRhombusArea();
+    handleTriangle();
+    setupItalicControl();
+  });
+
+</script>
+<div class="flex-container">
+  <div class="item1">
+    <div class="left-part">
+      <h1>Bazilik</h1>
+    </div>
+    <div class="right-part">
+      Ресторан італійської кухні
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="left-content">
+      <div class="top-row">
+        <div class="item2">Про нас <br/>
+          "Bazilik" — це італійський ресторан, що поєднує вишукану атмосферу, сучасний інтер'єр та справжні
+          кулінарні шедеври. Ми пропонуємо вам неповторний досвід італійської кухні, створений з любов'ю до
+          традицій.
+        </div>
+        <div class="item3">Тут було зображення але я його прибрав для коректної
+          роботи всіх завдань з цієї лабораторної у 3 блоці</div>
+      </div>
+      <div class="item5">Наше меню <br/>
+        Насолоджуйтесь різноманітністю страв: від класичних піц і паст до авторських десертів та вишуканих вин.
+        Кожен інгредієнт ретельно підібраний, щоб дарувати вам справжнє задоволення від смаку.
+      </div>
+    </div>
+    <div class="item4">
+      <ul>
+        <li><a href="index.html">Grid</a></li>
+        <li><a href="index1.html">Flexbox</a></li>
+        <li><a href="index2.html">Table</a></li>
+        <li><a href="index3.html">Postal version</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="item6">
+    <div class="left-part">
+      <h3>Bazilik</h3>
+    </div>
+    <div class="right-part">
+      Забронюйте стіл <br/>
+      Ми раді вітати вас у нашому ресторані! Забронюйте столик заздалегідь, щоб насолодитися атмосферою "Bazilik" у
+      будь-який зручний для вас час.
+    </div>
+  </div>
+</div>
+</body>
+</html>
